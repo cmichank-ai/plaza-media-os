@@ -1,0 +1,7 @@
+name = "plaza-media-os"
+compatibility_date = "2025-06-01"
+
+# Sirve el sitio como archivos estáticos. index.html se entrega en la raíz.
+[assets]
+directory = "./"
+not_found_handling = "single-page-application"
