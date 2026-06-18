@@ -23,6 +23,7 @@
   input,select,textarea{font:inherit;border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;background:#fff}
   select{-webkit-appearance:none;appearance:none;padding-right:30px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%231E3A8A' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 11px center}
   .plz-card{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:#fff}
+  .nav-sec{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#86A9F0;margin:14px 10px 4px;padding-top:10px;border-top:1px solid rgba(255,255,255,.12)}
   textarea{min-height:64px;resize:vertical}
   input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:var(--accent)}
   .badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
@@ -374,17 +375,18 @@ function requiereAprob(c){ return descMax(c)>(S.config.umbral_descuento||15); }
 function estadoAprob(c){ return (c.aprobacion&&c.aprobacion.estado)||(requiereAprob(c)?"Pendiente":"No requiere"); }
 
 /* ============ CONSOLA AGENCIA ============ */
-const NAV=[["tablero","Tablero"],["alertas","Alertas"],["campanas","Campañas"],["solicitudes","Solicitudes"],["forecast","Pronóstico"],["metas","Metas"],["calendario","Calendario"],["campo","Campo 📷"],["artes","Artes 🎨"],["medicion","Medición 📊"],["clientes","Clientes"],["paquetes","Paquetes"],["inventario","Inventario"],["tarifas","Tarifas"],["lealtad","Lealtad"],["inquilinos","Inquilinos"],["proveedores","Proveedores"],["facturacion","Facturación"],["reportes","Reportes"],["admin","Admin"],["bitacora","Bitácora"],["config","Configuración"]];
+const NAV=[["tablero","Tablero"],["alertas","Alertas"],["campanas","Campañas"],["solicitudes","Solicitudes"],["forecast","Pronóstico"],["metas","Metas"],["calendario","Calendario"],["campo","Campo 📷"],["artes","Artes 🎨"],["medicion","Medición 📊"],["clientes","Clientes"],["paquetes","Paquetes"],["inventario","Inventario"],["tarifas","Tarifas"],["lealtad","Lealtad"],["inquilinos","Inquilinos"],["proveedores","Proveedores"],["facturacion","Facturación"],["reportes","Reportes"],["admin","Admin"],["bitacora","Bitácora"],["config","Configuración"],["mkt_tablero","Tablero MKT"],["mkt_campanas","Campañas APE"]];
+const MKT_KEYS=["mkt_tablero","mkt_campanas","mkt_contenido","mkt_eventos","mkt_artes"];
 const NAV_ROL={
   "Dirección":NAV.map(n=>n[0]),
-  "Director divisional":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","campo","artes","medicion","clientes","paquetes","inventario","tarifas","lealtad","inquilinos","proveedores","facturacion","reportes"],
-  "Gerente regional":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","campo","artes","medicion","clientes","paquetes","inventario","tarifas","lealtad","inquilinos","proveedores","facturacion","reportes"],
+  "Director divisional":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","campo","artes","medicion","clientes","paquetes","inventario","tarifas","lealtad","inquilinos","proveedores","facturacion","reportes","mkt_tablero","mkt_campanas"],
+  "Gerente regional":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","campo","artes","medicion","clientes","paquetes","inventario","tarifas","lealtad","inquilinos","proveedores","facturacion","reportes","mkt_tablero","mkt_campanas"],
   "Gerente de plaza":["tablero","alertas","campanas","forecast","metas","calendario","campo","artes","medicion","clientes","paquetes","inventario","tarifas","lealtad","inquilinos","proveedores"],
-  "Comercial":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","campo","artes","clientes","paquetes","inventario","tarifas","lealtad"],
+  "Comercial":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","campo","artes","clientes","paquetes","inventario","tarifas","lealtad","mkt_tablero","mkt_campanas"],
   "Operaciones":["tablero","alertas","campanas","calendario","campo","medicion","inventario","inquilinos","proveedores"],
-  "Finanzas":["tablero","facturacion","reportes","clientes","campanas"],
-  "Diseño":["tablero","campanas","calendario","campo","artes"],
-  "Consulta":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","artes","medicion","clientes","paquetes","inventario","tarifas","lealtad","inquilinos","proveedores","facturacion","reportes"]
+  "Finanzas":["tablero","facturacion","reportes","clientes","campanas","mkt_tablero","mkt_campanas"],
+  "Diseño":["tablero","campanas","calendario","campo","artes","mkt_tablero","mkt_campanas"],
+  "Consulta":["tablero","alertas","campanas","solicitudes","forecast","metas","calendario","artes","medicion","clientes","paquetes","inventario","tarifas","lealtad","inquilinos","proveedores","facturacion","reportes","mkt_tablero","mkt_campanas"]
 };
 function permitidas(){ return NAV_ROL[S.perfil.rol]||["tablero"]; }
 // Permisos transversales
@@ -444,7 +446,7 @@ function shell(html){
   const permit=permitidas();
   const alertas = S.D.alertas||[];
   const noLeidas=(S.D.notifs||[]).filter(n=>!n.leida).length;
-  const nav=NAV.filter(([k])=>permit.includes(k)).map(([k,l])=>`<button class="${S.vista===k?'on':''}" onclick="irVista('${k}')"><span class="lbl">${l}</span>${k==="alertas"&&alertas.length?`<span class="cnt">${alertas.length}</span>`:''}</button>`).join("");
+  const nav=NAV.filter(([k])=>permit.includes(k)).map(([k,l])=>`${k==="mkt_tablero"?'<div class="nav-sec">Marketing APE</div>':''}<button class="${S.vista===k?'on':''}" onclick="irVista('${k}')"><span class="lbl">${l}</span>${k==="alertas"&&alertas.length?`<span class="cnt">${alertas.length}</span>`:''}</button>`).join("");
   root.innerHTML=`<div class="app"><div class="scrim" onclick="cerrarMenu()"></div>
     <div class="topbar"><button class="hamb" onclick="toggleMenu()" aria-label="Menú">☰</button><b>Plaza Media OS</b><button class="topbell" onclick="abrirNotifs()" aria-label="Notificaciones">🔔${noLeidas?`<span class="cnt">${noLeidas}</span>`:''}</button></div>
     <aside class="side">
@@ -468,7 +470,7 @@ function abrirNotifs(){
   document.body.appendChild(o);
 }
 window.abrirNotifs=abrirNotifs;
-function irVista(v){ S.vista=v; S.campSel=null; cerrarMenu(); window.scrollTo(0,0); renderConsola(); }
+function irVista(v){ S.vista=v; S.campSel=null; S.mktSel=null; cerrarMenu(); window.scrollTo(0,0); renderConsola(); }
 function toggleMenu(){const s=document.querySelector(".side");const sc=document.querySelector(".scrim");if(s){s.classList.toggle("open");if(sc)sc.classList.toggle("on");}}
 function cerrarMenu(){const s=document.querySelector(".side");const sc=document.querySelector(".scrim");if(s)s.classList.remove("open");if(sc)sc.classList.remove("on");}
 window.toggleMenu=toggleMenu;window.cerrarMenu=cerrarMenu;
@@ -506,6 +508,8 @@ async function renderConsola(){
     else if(v==="reportes") vReportes();
     else if(v==="admin") await vAdmin();
     else if(v==="config") vConfig();
+    else if(v==="mkt_tablero") await vMktTablero();
+    else if(v==="mkt_campanas") S.mktSel?await vMktCampDetalle():await vMktCampanas();
   }catch(e){ shell(`<div class="vacio">Error: ${esc(e.message)}</div>`); }
 }
 
@@ -1093,6 +1097,150 @@ function exportarCalendario(){
   const a=document.createElement("a");a.href=url;a.download=`calendario-${hoy()}.csv`;a.click();URL.revokeObjectURL(url);toast("CSV descargado");
 }
 window.exportarCalendario=exportarCalendario;
+
+/* ============ MARKETING INTERNO APE ============ */
+const MKT_OBJ={atraer_locatarios:"Atraer locatarios",awareness:"Difusión / awareness",evento:"Evento",temporada:"Temporada",otro:"Otro"};
+const mktObjLabel=o=>MKT_OBJ[o]||o;
+const MKT_ESTADOS=["Idea","Planeación","En curso","Finalizada","Cancelada"];
+const MKT_GASTO_EST=["Planeado","Comprometido","Pagado"];
+function mktEstadoBadge(e){const col=e==="En curso"?'background:var(--accent-soft);color:var(--accent)':e==="Finalizada"?'background:#E6ECF8;color:#16213F':e==="Cancelada"?'background:#F4D9D2;color:#8A2B16':'background:#F8EEDC;color:#7A5108';return `<span class="badge" style="${col}">${esc(e)}</span>`;}
+
+async function vMktTablero(){
+  const {data:camps}=await db.from("mkt_campanas").select("*, mkt_gastos(monto)").order("creada_en",{ascending:false});
+  const cs=camps||[];
+  const presTotal=cs.reduce((s,c)=>s+Number(c.presupuesto||0),0);
+  const gastTotal=cs.reduce((s,c)=>s+(c.mkt_gastos||[]).reduce((a,g)=>a+Number(g.monto||0),0),0);
+  const pct=presTotal>0?Math.round(gastTotal/presTotal*100):0;
+  const enCurso=cs.filter(c=>c.estado==="En curso");
+  const {data:evs}=await db.from("mkt_eventos").select("*, plazas(nombre)").gte("inicio",hoy()).order("inicio").limit(8);
+  const evFilas=(evs||[]).map(e=>`<div class="venc-row"><span>${esc(e.nombre)} <span class="sub">${esc(e.plazas?.nombre||'')}</span></span><span class="sub num">${fc(e.inicio)}</span></div>`).join("")||'<div class="vacio">Sin eventos próximos (se agregan en una próxima etapa).</div>';
+  const curFilas=enCurso.map(c=>{const g=(c.mkt_gastos||[]).reduce((a,x)=>a+Number(x.monto||0),0);const p=c.presupuesto>0?Math.round(g/c.presupuesto*100):0;return `<button class="venc-row" onclick="abrirMkt('${c.id}')"><span>${esc(c.nombre)}</span><span class="sub num">${mxn(g)} / ${mxn(c.presupuesto)} (${p}%)</span></button>`;}).join("")||'<div class="vacio">Sin campañas en curso.</div>';
+  shell(`<div class="head"><h1>Tablero de Marketing</h1>${soloLectura()?'':`<button class="btn" onclick="mktCampForm()">+ Campaña</button>`}</div>
+    <div class="panel hero"><div class="hero-grid">
+      <div class="hero-main"><div class="lbl">Presupuesto de marketing (todas las campañas)</div><div class="big">${mxn(presTotal)}</div><div class="sub2">Gastado ${mxn(gastTotal)} · Disponible ${mxn(Math.max(0,presTotal-gastTotal))}</div><div class="sub2">${cs.length} campaña(s) · ${enCurso.length} en curso</div></div>
+      <div class="gauge" style="background:conic-gradient(#86A9F0 ${Math.min(100,pct)*3.6}deg, rgba(255,255,255,.16) 0)"><div class="gauge-in">${pct}%<span>gastado</span></div></div>
+    </div></div>
+    <div class="dash-cols">
+      <div class="panel"><div class="panel-head"><h2>Campañas en curso</h2><button class="btn-ghost" onclick="irVista('mkt_campanas')">Ver todas</button></div>${curFilas}</div>
+      <div class="panel"><h2>Próximos eventos</h2>${evFilas}</div>
+    </div>`);
+}
+
+async function vMktCampanas(){
+  const {data:camps}=await db.from("mkt_campanas").select("*, mkt_campana_plazas(plaza_id), mkt_gastos(monto)").order("creada_en",{ascending:false});
+  const ro=soloLectura();
+  const filas=(camps||[]).map(c=>{const gastado=(c.mkt_gastos||[]).reduce((s,g)=>s+Number(g.monto||0),0);const pct=c.presupuesto>0?Math.round(gastado/c.presupuesto*100):0;const np=(c.mkt_campana_plazas||[]).length;return `<tr class="clic" onclick="abrirMkt('${c.id}')"><td><strong>${esc(c.nombre)}</strong><div class="sub">${mktObjLabel(c.objetivo)}${np?` · ${np} plaza(s)`:' · todas / corporativo'}</div></td><td>${mktEstadoBadge(c.estado)}</td><td class="der num">${mxn(c.presupuesto)}</td><td class="der num">${mxn(gastado)} <span class="sub">(${pct}%)</span></td></tr>`;}).join("")||`<tr><td colspan="4" class="vacio">Sin campañas de marketing todavía. Crea la primera.</td></tr>`;
+  shell(`<div class="head"><h1>Campañas APE</h1>${ro?'':'<button class="btn" onclick="mktCampForm()">+ Campaña</button>'}</div>
+    <p class="sub" style="margin-bottom:10px">Iniciativas de mercadotecnia propias de APE (atraer locatarios, difusión, eventos, temporadas). Llevan <b>presupuesto y gasto</b>, no ingreso.</p>
+    <div class="panel"><table><thead><tr><th>Campaña</th><th>Estado</th><th class="der">Presupuesto</th><th class="der">Gastado</th></tr></thead><tbody>${filas}</tbody></table></div>`);
+}
+
+function abrirMkt(id){S.vista="mkt_campanas";S.mktSel=id;window.scrollTo(0,0);renderConsola();}
+window.abrirMkt=abrirMkt;
+
+async function vMktCampDetalle(){
+  const {data:c}=await db.from("mkt_campanas").select("*, mkt_campana_plazas(plaza_id), mkt_gastos(*, proveedores(nombre), plazas(nombre)), mkt_resultados(*)").eq("id",S.mktSel).single();
+  if(!c){S.mktSel=null;return vMktCampanas();}
+  const ro=soloLectura();
+  const [{data:perf},{data:plz}]=await Promise.all([db.from("perfiles").select("id,nombre"),db.from("plazas").select("id,nombre")]);
+  const nom=id=>(perf||[]).find(p=>p.id===id)?.nombre||"—";
+  const plazasNom=(c.mkt_campana_plazas||[]).map(x=>(plz||[]).find(p=>p.id===x.plaza_id)?.nombre).filter(Boolean);
+  const gastado=(c.mkt_gastos||[]).reduce((s,g)=>s+Number(g.monto||0),0);
+  const pct=c.presupuesto>0?Math.round(gastado/c.presupuesto*100):0;
+  const barCol=pct>=90?'var(--rojo)':pct>=70?'var(--ambar)':'var(--accent)';
+  const gFilas=(c.mkt_gastos||[]).slice().sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).map(g=>`<tr><td>${esc(g.concepto)}${g.nota?`<div class="sub">${esc(g.nota)}</div>`:''}</td><td>${esc(g.plazas?.nombre||'—')}</td><td>${esc(g.proveedores?.nombre||'—')}</td><td>${esc(g.estado)}</td><td class="der num">${mxn(g.monto)}</td><td class="der">${ro?'':`<button class="btn-ghost" onclick="mktGastoForm('${c.id}','${g.id}')">editar</button><button class="btn-ghost rojo" onclick="borrar('mkt_gastos','${g.id}')">✕</button>`}</td></tr>`).join("")||`<tr><td colspan="6" class="vacio">Sin gastos registrados.</td></tr>`;
+  const rFilas=(c.mkt_resultados||[]).map(r=>{const p=r.objetivo>0?Math.round(r.real/r.objetivo*100):0;return `<tr><td>${esc(r.metrica)}</td><td class="der num">${fmtImp(r.objetivo)}</td><td class="der num">${fmtImp(r.real)}</td><td class="der">${r.objetivo>0?p+'%':'—'}</td><td class="der">${ro?'':`<button class="btn-ghost" onclick="mktResultadoForm('${c.id}','${r.id}')">editar</button><button class="btn-ghost rojo" onclick="borrar('mkt_resultados','${r.id}')">✕</button>`}</td></tr>`;}).join("")||`<tr><td colspan="5" class="vacio">Sin resultados.</td></tr>`;
+  shell(`<button class="btn-ghost" onclick="irVista('mkt_campanas')">← Campañas APE</button>
+    <div class="head" style="margin-top:8px"><h1>${esc(c.nombre)}</h1><div style="display:flex;gap:6px">${ro?'':`<button class="btn-ghost" onclick="mktCampForm('${c.id}')">Editar</button><button class="btn-ghost rojo" onclick="borrarMkt('${c.id}')">Eliminar</button>`}</div></div>
+    <div class="panel"><div class="dash-cols">
+      <div><div class="sub">Objetivo</div><div><b>${mktObjLabel(c.objetivo)}</b> · ${mktEstadoBadge(c.estado)}</div>
+        <div class="sub" style="margin-top:8px">Periodo</div><div>${fc(c.inicio)} – ${fc(c.fin)}</div>
+        <div class="sub" style="margin-top:8px">Responsable</div><div>${esc(nom(c.responsable_id))}</div>
+        <div class="sub" style="margin-top:8px">Plazas</div><div>${plazasNom.length?plazasNom.map(n=>`<span class="chip">${esc(n)}</span>`).join(' '):'<span class="sub">Todas / corporativo</span>'}</div>
+        ${c.descripcion?`<div class="sub" style="margin-top:8px">Descripción</div><div>${esc(c.descripcion)}</div>`:''}
+      </div>
+      <div><div class="sub">Presupuesto</div><div style="font-family:Archivo;font-size:26px;font-weight:700">${mxn(c.presupuesto)}</div>
+        <div class="sub" style="margin-top:6px">Gastado: <b>${mxn(gastado)}</b> (${pct}%)</div>
+        <div style="height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px"><div style="height:100%;width:${Math.min(100,pct)}%;background:${barCol}"></div></div>
+        <div class="sub" style="margin-top:6px">Disponible: ${mxn(Math.max(0,c.presupuesto-gastado))}</div>
+        ${ro?'':`<div style="margin-top:10px"><label class="sub">Cambiar estado</label><select onchange="mktSetEstado('${c.id}',this.value)">${MKT_ESTADOS.map(e=>`<option ${e===c.estado?'selected':''}>${e}</option>`).join("")}</select></div>`}
+      </div>
+    </div></div>
+    <div class="panel"><div class="panel-head"><h2>Gastos</h2>${ro?'':`<button class="btn sm" onclick="mktGastoForm('${c.id}')">+ Gasto</button>`}</div><table><thead><tr><th>Concepto</th><th>Plaza</th><th>Proveedor</th><th>Estado</th><th class="der">Monto</th><th></th></tr></thead><tbody>${gFilas}</tbody></table></div>
+    <div class="panel"><div class="panel-head"><h2>Resultados</h2>${ro?'':`<button class="btn sm" onclick="mktResultadoForm('${c.id}')">+ Resultado</button>`}</div><table><thead><tr><th>Métrica</th><th class="der">Objetivo</th><th class="der">Real</th><th class="der">%</th><th></th></tr></thead><tbody>${rFilas}</tbody></table></div>`);
+}
+
+async function mktCampForm(id){
+  if(soloLectura())return;
+  const [{data:perf},{data:plz}]=await Promise.all([db.from("perfiles").select("id,nombre").order("nombre"),db.from("plazas").select("id,nombre").order("nombre")]);
+  const abrir=item=>formModal({title:item?"Editar campaña":"Nueva campaña de marketing",fields:[
+    {key:"nombre",label:"Nombre",value:item?.nombre||""},
+    {key:"objetivo",label:"Objetivo",type:"select",options:Object.entries(MKT_OBJ).map(([v,l])=>({value:v,label:l})),value:item?.objetivo||"otro",col:"g"},
+    {key:"estado",label:"Estado",type:"select",options:MKT_ESTADOS.map(e=>({value:e,label:e})),value:item?.estado||"Idea",col:"g"},
+    {key:"inicio",label:"Inicio",type:"date",value:item?.inicio||hoy(),col:"g"},
+    {key:"fin",label:"Fin",type:"date",value:item?.fin||addDias(hoy(),30),col:"g"},
+    {key:"presupuesto",label:"Presupuesto (MXN)",type:"number",value:item?.presupuesto||0,col:"g"},
+    {key:"responsable_id",label:"Responsable",type:"select",options:[{value:"",label:"—"}].concat((perf||[]).map(p=>({value:p.id,label:p.nombre}))),value:item?.responsable_id||"",col:"g"},
+    {key:"plazas",label:"Plazas (vacío = todas / corporativo)",type:"multi",options:(plz||[]).map(p=>({value:p.id,label:p.nombre})),value:item?._plazas||[]},
+    {key:"descripcion",label:"Descripción",type:"textarea",value:item?.descripcion||""}
+  ],onSave:async v=>{
+    if(!v.nombre)return false;
+    const payload={nombre:v.nombre,objetivo:v.objetivo,estado:v.estado,inicio:v.inicio||null,fin:v.fin||null,presupuesto:v.presupuesto||0,responsable_id:v.responsable_id||null,descripcion:v.descripcion||""};
+    let cid=item?.id;
+    if(item){const {error}=await db.from("mkt_campanas").update(payload).eq("id",item.id);if(error){toast("No se pudo: "+error.message);return false;}}
+    else{payload.creada_por=S.perfil.id;const {data,error}=await db.from("mkt_campanas").insert(payload).select().single();if(error){toast("No se pudo: "+error.message);return false;}cid=data.id;}
+    await db.from("mkt_campana_plazas").delete().eq("campana_id",cid);
+    if((v.plazas||[]).length)await db.from("mkt_campana_plazas").insert(v.plazas.map(pid=>({campana_id:cid,plaza_id:pid})));
+    toast("Campaña guardada");S.mktSel=cid;renderConsola();
+  }});
+  if(id){const {data}=await db.from("mkt_campanas").select("*, mkt_campana_plazas(plaza_id)").eq("id",id).single();if(data){data._plazas=(data.mkt_campana_plazas||[]).map(x=>x.plaza_id);abrir(data);}}
+  else abrir(null);
+}
+window.mktCampForm=mktCampForm;
+
+async function mktGastoForm(campId,id){
+  if(soloLectura())return;
+  const [{data:prov},{data:plz}]=await Promise.all([db.from("proveedores").select("id,nombre").order("nombre"),db.from("plazas").select("id,nombre").order("nombre")]);
+  const abrir=item=>formModal({title:item?"Editar gasto":"Nuevo gasto",fields:[
+    {key:"concepto",label:"Concepto",value:item?.concepto||""},
+    {key:"monto",label:"Monto (MXN)",type:"number",value:item?.monto||0,col:"g"},
+    {key:"estado",label:"Estado",type:"select",options:MKT_GASTO_EST.map(e=>({value:e,label:e})),value:item?.estado||"Planeado",col:"g"},
+    {key:"fecha",label:"Fecha",type:"date",value:item?.fecha||hoy(),col:"g"},
+    {key:"plaza_id",label:"Plaza (opcional)",type:"select",options:[{value:"",label:"—"}].concat((plz||[]).map(p=>({value:p.id,label:p.nombre}))),value:item?.plaza_id||"",col:"g"},
+    {key:"proveedor_id",label:"Proveedor (opcional)",type:"select",options:[{value:"",label:"—"}].concat((prov||[]).map(p=>({value:p.id,label:p.nombre}))),value:item?.proveedor_id||""},
+    {key:"nota",label:"Nota",type:"textarea",value:item?.nota||""}
+  ],onSave:async v=>{
+    if(!v.concepto)return false;
+    const payload={campana_id:campId,concepto:v.concepto,monto:v.monto||0,estado:v.estado,fecha:v.fecha||null,plaza_id:v.plaza_id||null,proveedor_id:v.proveedor_id||null,nota:v.nota||""};
+    if(item){const {error}=await db.from("mkt_gastos").update(payload).eq("id",item.id);if(error){toast("No se pudo: "+error.message);return false;}}
+    else{const {error}=await db.from("mkt_gastos").insert(payload);if(error){toast("No se pudo: "+error.message);return false;}}
+    toast("Gasto guardado");vMktCampDetalle();
+  }});
+  if(id){const {data}=await db.from("mkt_gastos").select("*").eq("id",id).single();abrir(data);}else abrir(null);
+}
+window.mktGastoForm=mktGastoForm;
+
+function mktResultadoForm(campId,id){
+  if(soloLectura())return;
+  const abrir=item=>formModal({title:item?"Editar resultado":"Nuevo resultado",fields:[
+    {key:"metrica",label:"Métrica",ph:"Ej. Alcance, Asistentes, Locatarios nuevos",value:item?.metrica||""},
+    {key:"objetivo",label:"Objetivo",type:"number",value:item?.objetivo||0,col:"g"},
+    {key:"real",label:"Real",type:"number",value:item?.real||0,col:"g"}
+  ],onSave:async v=>{
+    if(!v.metrica)return false;
+    const payload={campana_id:campId,metrica:v.metrica,objetivo:v.objetivo||0,real:v.real||0};
+    if(item){const {error}=await db.from("mkt_resultados").update(payload).eq("id",item.id);if(error){toast("No se pudo: "+error.message);return false;}}
+    else{const {error}=await db.from("mkt_resultados").insert(payload);if(error){toast("No se pudo: "+error.message);return false;}}
+    toast("Resultado guardado");vMktCampDetalle();
+  }});
+  if(id)db.from("mkt_resultados").select("*").eq("id",id).single().then(({data})=>abrir(data));else abrir(null);
+}
+window.mktResultadoForm=mktResultadoForm;
+
+async function mktSetEstado(id,v){if(soloLectura())return;const {error}=await db.from("mkt_campanas").update({estado:v}).eq("id",id);if(error){toast("No se pudo: "+error.message);return;}toast("Estado: "+v);vMktCampDetalle();}
+window.mktSetEstado=mktSetEstado;
+async function borrarMkt(id){if(soloLectura())return;if(!confirm("¿Eliminar esta campaña de marketing y todo lo asociado?"))return;const {error}=await db.from("mkt_campanas").delete().eq("id",id);if(error){toast("No se pudo: "+error.message);return;}toast("Campaña eliminada");S.mktSel=null;irVista("mkt_campanas");}
+window.borrarMkt=borrarMkt;
 
 /* --- APP DE CAMPO (cámara + GPS + subida) --- */
 async function vCampo(){
