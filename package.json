@@ -1,7 +1,0 @@
-{
-  "name": "plaza-media-os",
-  "private": true,
-  "scripts": {
-    "build": "echo \"sin paso de build\""
-  }
-}
